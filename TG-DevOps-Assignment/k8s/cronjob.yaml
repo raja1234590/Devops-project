@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: process-data-job
+spec:
+  schedule: "0 0 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: s3-access-sa
+          containers:
+          - name: data-processor
+            image: <AWS_ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com/data-processor:latest
+            env:
+            - name: RAW_BUCKET
+              value: "raw-data"
+            - name: PROCESSED_BUCKET
+              value: "processed-data"
+            - name: INPUT_KEY
+              value: "input.csv"
+            - name: OUTPUT_KEY
+              value: "output.csv"
+            resources:
+              requests:
+                memory: "256Mi"
+                cpu: "250m"
+              limits:
+                memory: "512Mi"
+                cpu: "500m"
+          restartPolicy: OnFailure
